@@ -9,7 +9,7 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  const uploadDir = path.join(process.cwd(), '/uploads');
+  const uploadDir = path.join(process.cwd(), '/upload');
 
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
