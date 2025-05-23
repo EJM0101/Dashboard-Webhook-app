@@ -1,6 +1,6 @@
 import fs from 'fs';
 import path from 'path';
-import formidable from 'formidable';
+import { IncomingForm } from 'formidable'; // Import correct
 
 export const config = {
   api: {
@@ -9,24 +9,28 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  const uploadDir = path.join(process.cwd(), '/uploads');
+  const uploadDir = path.join(process.cwd(), '/upload');
 
+  // Crée le dossier s'il n'existe pas
   if (!fs.existsSync(uploadDir)) {
     fs.mkdirSync(uploadDir);
   }
 
-  const form = new formidable.IncomingForm({
+  // Crée le formulaire
+  const form = new IncomingForm({
     multiples: true,
     uploadDir,
     keepExtensions: true,
   });
 
+  // Parse la requête
   form.parse(req, (err, fields, files) => {
     if (err) {
       console.error('Erreur de parsing :', err);
-      return res.status(500).json({ error: 'Erreur de parsing' });
+      return res.status(500).json({ error: 'Erreur lors du parsing du fichier' });
     }
 
-    return res.status(200).json({ message: 'Fichiers uploadés', files });
+    console.log('Fichiers reçus :', files);
+    return res.status(200).json({ message: 'Fichier(s) uploadé(s) avec succès', files });
   });
 }
