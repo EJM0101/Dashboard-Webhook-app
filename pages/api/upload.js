@@ -1,6 +1,7 @@
+// pages/api/upload.js
 import fs from 'fs';
 import path from 'path';
-import formidable from 'formidable';
+import { IncomingForm } from 'formidable'; // Import correct pour Formidable v3+
 
 export const config = {
   api: {
@@ -15,7 +16,7 @@ export default async function handler(req, res) {
     fs.mkdirSync(uploadDir);
   }
 
-  const form = new formidable.IncomingForm({
+  const form = new IncomingForm({
     multiples: true,
     uploadDir,
     keepExtensions: true,
@@ -23,10 +24,11 @@ export default async function handler(req, res) {
 
   form.parse(req, (err, fields, files) => {
     if (err) {
-      console.error('Erreur de parsing :', err);
+      console.error('Erreur upload:', err);
       return res.status(500).json({ error: 'Erreur de parsing' });
     }
 
-    return res.status(200).json({ message: 'Fichiers uploadés', files });
+    console.log('Fichier reçu :', files);
+    return res.status(200).json({ message: 'Fichier uploadé', files });
   });
 }
