@@ -1,4 +1,3 @@
-// pages/index.js
 import { useEffect, useState } from 'react';
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -31,28 +30,16 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-  if (files.length === 0) {
-    alert("Veuillez sélectionner un fichier.");
-    return;
-  }
-
-  const formData = new FormData();
-  for (let file of files) {
-    formData.append("files", file);
-  }
-
-  const res = await fetch("/api/upload", {
-    method: "POST",
-    body: formData,
-  });
-
-  if (res.ok) {
-    alert("Fichier uploadé avec succès.");
-    fetchData(); // recharge les données
-  } else {
-    alert("Échec de l’upload.");
-  }
-};
+    const formData = new FormData();
+    for (let file of files) {
+      formData.append("files", file);
+    }
+    await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+    fetchData();
+  };
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
