@@ -31,16 +31,28 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-    const formData = new FormData();
-    for (let file of files) {
-      formData.append("files", file);
-    }
-    await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-    fetchData();
-  };
+  if (files.length === 0) {
+    alert("Veuillez sélectionner un fichier.");
+    return;
+  }
+
+  const formData = new FormData();
+  for (let file of files) {
+    formData.append("files", file);
+  }
+
+  const res = await fetch("/api/upload", {
+    method: "POST",
+    body: formData,
+  });
+
+  if (res.ok) {
+    alert("Fichier uploadé avec succès.");
+    fetchData(); // recharge les données
+  } else {
+    alert("Échec de l’upload.");
+  }
+};
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
