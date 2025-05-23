@@ -18,12 +18,11 @@ export default function Dashboard() {
   useEffect(() => {
     fetchData();
 
-    const evtSource = new EventSource("/api/stream");
-    evtSource.onmessage = () => {
-      fetchData(); // refresh on webhook event
-    };
+    const intervalId = setInterval(() => {
+      fetchData();
+    }, 10000);
 
-    return () => evtSource.close();
+    return () => clearInterval(intervalId);
   }, []);
 
   const handleFileChange = (e) => {
