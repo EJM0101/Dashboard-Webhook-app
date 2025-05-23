@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const [data, formData] = useState([]);
+  const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState([]);
 
@@ -31,13 +31,13 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-    const formData = new FormData();
+    //const formData = new FormData();
     for (let file of files) {
-      formData.append("files", file);
+      setData.append("files", file);
     }
     await fetch("/api/upload", {
       method: "POST",
-      body: formData,
+      body: setData,
     });
     fetchData();
   };
