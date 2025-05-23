@@ -23,12 +23,6 @@ npm install
 npm run dev
 ```
 
-## Déploiement sur Vercel
-
-- Poussez ce dossier vers GitHub.
-- Connectez votre repo à [Vercel](https://vercel.com/).
-- Déployez automatiquement.
-
 ## Structure des fichiers CSV pris en charge
 
 ```csv
