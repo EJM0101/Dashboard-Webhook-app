@@ -4,7 +4,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
-  const [data, setData] = useState([]);
+  const [data, formData] = useState([]);
   const [loading, setLoading] = useState(true);
   const [files, setFiles] = useState([]);
 
