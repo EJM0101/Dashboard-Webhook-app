@@ -1,4 +1,4 @@
-# Dashboard Webhook (Next.js + Vercel)
+# Dashboard Webhook
 
 Ce projet est une mini-application de tableau de bord en ligne permettant :
 
