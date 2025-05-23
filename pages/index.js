@@ -31,13 +31,13 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-    //const formData = new FormData();
+    const formData = new FormData();
     for (let file of files) {
-      setData.append("files", file);
+      formData.append("files", file);
     }
     await fetch("/api/upload", {
       method: "POST",
-      body: setData,
+      body: formData,
     });
     fetchData();
   };
