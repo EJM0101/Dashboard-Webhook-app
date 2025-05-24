@@ -65,33 +65,52 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Tableau de bord</h1>
+    <div className="min-h-screen bg-gray-50 px-6 py-10 max-w-6xl mx-auto">
+      <h1 className="text-4xl font-extrabold text-center text-indigo-800 mb-6">Datawarehouse Client Dashboard</h1>
 
-      <div className="mb-4">
-        <input type="file" multiple accept=".csv,.json" onChange={handleFileChange} className="block w-full text-sm" />
-        <button onClick={handleUpload} className="mt-2 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Envoyer les fichiers</button>
-      </div>
+      <section className="mb-8 bg-white shadow rounded-lg p-6">
+        <h2 className="text-2xl font-semibold mb-3 text-gray-700">À quoi sert cette application ?</h2>
+        <p className="text-gray-600">
+          Cette plateforme vous permet de charger des fichiers de données structurées (CSV ou JSON), qui seront traitées et visualisées en temps réel. 
+          Elle simule un système d'entrepôt de données moderne, où les utilisateurs peuvent explorer les enregistrements collectés depuis différents systèmes.
+          Elle convient aux cas d'usage comme :
+        </p>
+        <ul className="list-disc pl-6 mt-3 text-gray-600">
+          <li>La centralisation des données clients</li>
+          <li>Le reporting dynamique pour les analystes</li>
+          <li>Le prototypage de dashboards décisionnels</li>
+        </ul>
+      </section>
 
-      {loading ? (
-        <p>Chargement...</p>
-      ) : (
-        <div className="grid gap-4">
-          {data.length === 0 ? (
-            <p>Aucune donnée disponible.</p>
-          ) : (
-            data.map((item, index) => (
-              <div key={index} className="bg-white shadow rounded p-4 border">
-                {Object.entries(item).map(([key, value]) => (
-                  <div key={key}>
-                    <strong>{key} :</strong> {value}
-                  </div>
-                ))}
-              </div>
-            ))
-          )}
-        </div>
-      )}
+      <section className="mb-8 bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-2">Téléversement de fichiers</h2>
+        <p className="text-gray-500 mb-4">Importez un ou plusieurs fichiers CSV ou JSON contenant des données structurées (par exemple : clients, ventes, etc.).</p>
+        <input type="file" multiple accept=".csv,.json" onChange={handleFileChange} className="block w-full text-sm text-gray-600 mb-3" />
+        <button onClick={handleUpload} className="bg-indigo-600 text-white px-6 py-2 rounded hover:bg-indigo-700 transition">Charger les fichiers</button>
+      </section>
+
+      <section className="bg-white shadow rounded-lg p-6">
+        <h2 className="text-xl font-semibold text-gray-700 mb-3">Visualisation des données</h2>
+        {loading ? (
+          <p>Chargement des données...</p>
+        ) : (
+          <div className="grid gap-4">
+            {data.length === 0 ? (
+              <p className="text-gray-500">Aucune donnée disponible. Veuillez charger un fichier.</p>
+            ) : (
+              data.map((item, index) => (
+                <div key={index} className="bg-gray-100 p-4 rounded border border-gray-200">
+                  {Object.entries(item).map(([key, value]) => (
+                    <div key={key}>
+                      <strong>{key} :</strong> {value}
+                    </div>
+                  ))}
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </section>
     </div>
   );
 }
