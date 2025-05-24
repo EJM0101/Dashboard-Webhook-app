@@ -54,15 +54,47 @@ export default function Dashboard() {
   };
 
   const parseCSV = (text) => {
-    const rows = text.trim().split('\n');
-    const headers = rows[0].split(',');
-    return rows.slice(1).map(row => {
-      const values = row.split(',');
-      let obj = {};
-      headers.forEach((h, i) => obj[h.trim()] = values[i].trim());
-      return obj;
-    });
-  };
+  const lines = text.trim().split('\n');
+  const result = [];
+
+  let headers = null;
+
+  for (let line of lines) {
+    const values = [];
+    let current = '';
+    let inQuotes = false;
+
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      const next = line[i + 1];
+
+      if (char === '"' && inQuotes && next === '"') {
+        current += '"'; // escapement
+        i++;
+      } else if (char === '"') {
+        inQuotes = !inQuotes;
+      } else if (char === ',' && !inQuotes) {
+        values.push(current);
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    values.push(current);
+
+    if (!headers) {
+      headers = values.map(h => h.trim());
+    } else {
+      const obj = {};
+      headers.forEach((key, i) => {
+        obj[key] = values[i] ? values[i].trim() : '';
+      });
+      result.push(obj);
+    }
+  }
+
+  return result;
+};
 
   return (
     <div className="min-h-screen bg-gray-50 px-6 py-10 max-w-6xl mx-auto">
