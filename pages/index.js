@@ -3,7 +3,7 @@ import React, { useEffect, useState } from 'react';
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
 
   const fetchData = async () => {
     setLoading(true);
@@ -18,43 +18,39 @@ export default function Dashboard() {
   }, []);
 
   const handleFileChange = (e) => {
-    const f = e.target.files[0];
-    setFile(f);
+    setFiles(Array.from(e.target.files));
   };
 
   const handleUpload = async () => {
-    if (!file) return alert("Veuillez sélectionner un fichier");
+    if (!files.length) return alert("Veuillez sélectionner des fichiers");
 
-    const reader = new FileReader();
-    reader.onload = async (e) => {
-      let content = e.target.result;
-      let jsonData = [];
+    let allData = [];
 
-      try {
-        if (file.name.endsWith('.json')) {
-          jsonData = JSON.parse(content);
-        } else if (file.name.endsWith('.csv')) {
-          jsonData = parseCSV(content);
-        } else {
-          return alert("Fichier non supporté (CSV ou JSON uniquement)");
+    for (let file of files) {
+      const content = await file.text();
+      if (file.name.endsWith('.json')) {
+        try {
+          const json = JSON.parse(content);
+          allData = allData.concat(json);
+        } catch {
+          alert("Erreur dans le fichier JSON : " + file.name);
+          return;
         }
-
-        const res = await fetch('/api/upload', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(jsonData),
-        });
-
-        const result = await res.json();
-        console.log("Réponse :", result);
-        fetchData();
-      } catch (err) {
-        console.error("Erreur de lecture :", err);
-        alert("Erreur de lecture du fichier");
+      } else if (file.name.endsWith('.csv')) {
+        const rows = parseCSV(content);
+        allData = allData.concat(rows);
       }
-    };
+    }
 
-    reader.readAsText(file);
+    const res = await fetch('/api/upload', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(allData),
+    });
+
+    const result = await res.json();
+    console.log("Résultat :", result);
+    fetchData();
   };
 
   const parseCSV = (text) => {
@@ -69,24 +65,28 @@ export default function Dashboard() {
   };
 
   return (
-    <div className="p-4">
-      <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
+    <div className="p-6 max-w-4xl mx-auto">
+      <h1 className="text-3xl font-bold mb-6 text-center text-blue-700">Tableau de bord</h1>
 
-      <input type="file" accept=".csv,.json" onChange={handleFileChange} />
-      <button onClick={handleUpload} className="ml-2 bg-blue-600 text-white px-4 py-2 rounded">
-        Envoyer
-      </button>
+      <div className="mb-4">
+        <input type="file" multiple accept=".csv,.json" onChange={handleFileChange} className="block w-full text-sm" />
+        <button onClick={handleUpload} className="mt-2 bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700">Envoyer les fichiers</button>
+      </div>
 
       {loading ? (
         <p>Chargement...</p>
       ) : (
-        <div className="mt-4 space-y-2">
+        <div className="grid gap-4">
           {data.length === 0 ? (
             <p>Aucune donnée disponible.</p>
           ) : (
-            data.map((c, i) => (
-              <div key={i} className="border p-2 rounded bg-gray-100">
-                <strong>{c.name}</strong> — {c.email} (commande : {c.last_order})
+            data.map((item, index) => (
+              <div key={index} className="bg-white shadow rounded p-4 border">
+                {Object.entries(item).map(([key, value]) => (
+                  <div key={key}>
+                    <strong>{key} :</strong> {value}
+                  </div>
+                ))}
               </div>
             ))
           )}
