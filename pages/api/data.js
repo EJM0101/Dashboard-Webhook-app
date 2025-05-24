@@ -1,4 +1,6 @@
-import { getClients } from '@/lib/data';
+// pages/api/data.js
+
+import { getClients } from '@/lib/memoryStorage';
 
 export default function handler(req, res) {
   const clients = getClients();
