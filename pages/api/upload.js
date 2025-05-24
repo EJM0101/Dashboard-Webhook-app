@@ -1,5 +1,10 @@
-// pages/api/upload.js
 import { setClients } from '@/lib/memoryStorage';
+
+export const config = {
+  api: {
+    bodyParser: true,
+  },
+};
 
 export default function handler(req, res) {
   if (req.method !== 'POST') {
@@ -13,7 +18,6 @@ export default function handler(req, res) {
     }
 
     setClients(data);
-    console.log("Clients reçus et stockés :", data.length);
     return res.status(200).json({ message: 'Données enregistrées', count: data.length });
   } catch (err) {
     console.error("Erreur lors du traitement :", err);
