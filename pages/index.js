@@ -1,111 +1,96 @@
 import React, { useEffect, useState } from 'react';
-import { Card, CardContent } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
 
 export default function Dashboard() {
   const [data, setData] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [files, setFiles] = useState([]);
+  const [file, setFile] = useState(null);
 
   const fetchData = async () => {
     setLoading(true);
-    try {
-      const res = await fetch('/api/data');
-      const json = await res.json();
-      console.log("Données reçues :", json);
-      setData(json);
-    } catch (err) {
-      console.error("Erreur lors du fetch des données :", err);
-    }
+    const res = await fetch('/api/data');
+    const json = await res.json();
+    setData(json);
     setLoading(false);
   };
 
   useEffect(() => {
     fetchData();
-
-    const intervalId = setInterval(() => {
-      console.log("Interval: reload des données");
-      fetchData();
-    }, 10000);
-
-    return () => clearInterval(intervalId);
   }, []);
 
   const handleFileChange = (e) => {
-    console.log("Fichiers sélectionnés :", e.target.files);
-    setFiles(e.target.files);
+    const f = e.target.files[0];
+    setFile(f);
   };
 
   const handleUpload = async () => {
-  if (files.length === 0) {
-    alert("Aucun fichier sélectionné.");
-    return;
-  }
+    if (!file) return alert("Veuillez sélectionner un fichier");
 
-  const formData = new FormData();
-  for (let file of files) {
-    console.log("Ajout au formData :", file.name);
-    formData.append("files", file); // name important ici aussi
-  }
+    const reader = new FileReader();
+    reader.onload = async (e) => {
+      let content = e.target.result;
+      let jsonData = [];
 
-  console.log("Envoi du fetch /api/upload...");
-  try {
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
+      try {
+        if (file.name.endsWith('.json')) {
+          jsonData = JSON.parse(content);
+        } else if (file.name.endsWith('.csv')) {
+          jsonData = parseCSV(content);
+        } else {
+          return alert("Fichier non supporté (CSV ou JSON uniquement)");
+        }
+
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(jsonData),
+        });
+
+        const result = await res.json();
+        console.log("Réponse :", result);
+        fetchData();
+      } catch (err) {
+        console.error("Erreur de lecture :", err);
+        alert("Erreur de lecture du fichier");
+      }
+    };
+
+    reader.readAsText(file);
+  };
+
+  const parseCSV = (text) => {
+    const rows = text.trim().split('\n');
+    const headers = rows[0].split(',');
+    return rows.slice(1).map(row => {
+      const values = row.split(',');
+      let obj = {};
+      headers.forEach((h, i) => obj[h.trim()] = values[i].trim());
+      return obj;
     });
-
-    const result = await res.json();
-    console.log("Réponse de l'upload :", result);
-
-    if (res.ok) {
-      alert("Fichier uploadé !");
-      fetchData();
-    } else {
-      alert("Erreur serveur !");
-    }
-  } catch (err) {
-    console.error("Erreur réseau :", err);
-    alert("Erreur réseau lors de l’upload.");
-  }
-};
+  };
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
-      <h1 className="text-2xl font-bold col-span-full">Tableau de bord client</h1>
+    <div className="p-4">
+      <h1 className="text-2xl font-bold mb-4">Tableau de bord</h1>
 
-      <div className="col-span-full bg-blue-50 border border-blue-300 p-4 rounded-xl shadow">
-        <h2 className="text-xl font-semibold mb-2">Comment utiliser cette plateforme ?</h2>
-        <ul className="list-disc list-inside text-sm text-gray-700">
-          <li>Préparez un fichier <strong>.csv</strong> ou <strong>.json</strong> contenant des données clients.</li>
-          <li>Chaque client doit avoir au moins : <code>name</code>, <code>email</code>, <code>last_order</code>.</li>
-          <li>Utilisez le champ ci-dessous pour téléverser un ou plusieurs fichiers.</li>
-          <li>Les données s'affichent automatiquement après quelques secondes.</li>
-        </ul>
-      </div>
-
-      <div className="col-span-full bg-gray-100 p-4 rounded-xl shadow">
-        <label className="block mb-2 font-medium">Sélectionnez vos fichiers :</label>
-        <input type="file" name="files" multiple onChange={handleFileChange} className="mb-2" />
-        <Button onClick={handleUpload}>Uploader les données</Button>
-      </div>
+      <input type="file" accept=".csv,.json" onChange={handleFileChange} />
+      <button onClick={handleUpload} className="ml-2 bg-blue-600 text-white px-4 py-2 rounded">
+        Envoyer
+      </button>
 
       {loading ? (
         <p>Chargement...</p>
       ) : (
-        data.length === 0 ? (
-          <p className="col-span-full text-center text-gray-500">Aucune donnée disponible. Veuillez uploader un fichier.</p>
-        ) : (
-          data.map((client, i) => (
-            <Card key={i}>
-              <CardContent>
-                <h2 className="text-lg font-semibold">{client.name}</h2>
-                <p>Email : {client.email}</p>
-                <p>Dernière commande : {client.last_order}</p>
-              </CardContent>
-            </Card>
-          ))
-        )
+        <div className="mt-4 space-y-2">
+          {data.length === 0 ? (
+            <p>Aucune donnée disponible.</p>
+          ) : (
+            data.map((c, i) => (
+              <div key={i} className="border p-2 rounded bg-gray-100">
+                <strong>{c.name}</strong> — {c.email} (commande : {c.last_order})
+              </div>
+            ))
+          )}
+        </div>
       )}
     </div>
   );
