@@ -1,6 +1,10 @@
+// pages/api/upload.js
+
+import formidable from 'formidable';
+import { setClients } from '@/lib/memoryStorage';
 import fs from 'fs';
 import path from 'path';
-import { IncomingForm } from 'formidable'; // Import correct
+import csvParser from 'csv-parser';
 
 export const config = {
   api: {
@@ -9,28 +13,40 @@ export const config = {
 };
 
 export default async function handler(req, res) {
-  const uploadDir = path.join(process.cwd(), '/upload');
+  const form = formidable({ keepExtensions: true });
 
-  // Crée le dossier s'il n'existe pas
-  if (!fs.existsSync(uploadDir)) {
-    fs.mkdirSync(uploadDir);
-  }
-
-  // Crée le formulaire
-  const form = new IncomingForm({
-    multiples: true,
-    uploadDir,
-    keepExtensions: true,
-  });
-
-  // Parse la requête
-  form.parse(req, (err, fields, files) => {
+  form.parse(req, async (err, fields, files) => {
     if (err) {
-      console.error('Erreur de parsing :', err);
-      return res.status(500).json({ error: 'Erreur lors du parsing du fichier' });
+      console.error("Erreur upload :", err);
+      return res.status(500).json({ error: 'Erreur lors de l’upload' });
     }
 
-    console.log('Fichiers reçus :', files);
-    return res.status(200).json({ message: 'Fichier(s) uploadé(s) avec succès', files });
+    const uploadedFiles = Array.isArray(files.files) ? files.files : [files.files];
+    let data = [];
+
+    for (const file of uploadedFiles) {
+      if (file.originalFilename.endsWith('.json')) {
+        const content = fs.readFileSync(file.filepath, 'utf-8');
+        data = data.concat(JSON.parse(content));
+      } else if (file.originalFilename.endsWith('.csv')) {
+        const rows = await parseCSV(file.filepath);
+        data = data.concat(rows);
+      }
+    }
+
+    setClients(data);
+    return res.status(200).json({ message: 'Données reçues', count: data.length });
+  });
+}
+
+// Fonction pour parser un fichier CSV
+function parseCSV(filePath) {
+  return new Promise((resolve, reject) => {
+    const results = [];
+    fs.createReadStream(filePath)
+      .pipe(csvParser())
+      .on('data', (data) => results.push(data))
+      .on('end', () => resolve(results))
+      .on('error', reject);
   });
 }
