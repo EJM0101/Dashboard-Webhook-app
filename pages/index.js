@@ -37,37 +37,38 @@ export default function Dashboard() {
   };
 
   const handleUpload = async () => {
-    if (files.length === 0) {
-      alert("Aucun fichier sélectionné.");
-      return;
+  if (files.length === 0) {
+    alert("Aucun fichier sélectionné.");
+    return;
+  }
+
+  const formData = new FormData();
+  for (let file of files) {
+    console.log("Ajout au formData :", file.name);
+    formData.append("files", file); // name important ici aussi
+  }
+
+  console.log("Envoi du fetch /api/upload...");
+  try {
+    const res = await fetch("/api/upload", {
+      method: "POST",
+      body: formData,
+    });
+
+    const result = await res.json();
+    console.log("Réponse de l'upload :", result);
+
+    if (res.ok) {
+      alert("Fichier uploadé !");
+      fetchData();
+    } else {
+      alert("Erreur serveur !");
     }
-
-    const formData = new FormData();
-    for (let file of files) {
-      formData.append("files", file);
-    }
-
-    console.log("Envoi des fichiers à /api/upload...");
-    try {
-      const res = await fetch("/api/upload", {
-        method: "POST",
-        body: formData,
-      });
-
-      const result = await res.json();
-      console.log("Réponse upload :", result);
-
-      if (res.ok) {
-        alert("Fichier uploadé avec succès.");
-        fetchData();
-      } else {
-        alert("Erreur upload !");
-      }
-    } catch (err) {
-      console.error("Erreur lors de l'upload :", err);
-      alert("Erreur réseau lors de l'upload.");
-    }
-  };
+  } catch (err) {
+    console.error("Erreur réseau :", err);
+    alert("Erreur réseau lors de l’upload.");
+  }
+};
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4">
@@ -85,7 +86,7 @@ export default function Dashboard() {
 
       <div className="col-span-full bg-gray-100 p-4 rounded-xl shadow">
         <label className="block mb-2 font-medium">Sélectionnez vos fichiers :</label>
-        <input type="file" multiple onChange={handleFileChange} className="mb-2" />
+        <input type="file" name="files" multiple onChange={handleFileChange} className="mb-2" />
         <Button onClick={handleUpload}>Uploader les données</Button>
       </div>
 
