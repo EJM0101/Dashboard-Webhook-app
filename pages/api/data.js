@@ -1,4 +1,3 @@
-// pages/api/data.js
 import { getClients } from '@/lib/memoryStorage';
 
 export default function handler(req, res) {
