@@ -1,41 +1,41 @@
-# Dashboard Webhook
+# Datawarehouse Client Dashboard
 
-Ce projet est une mini-application de tableau de bord en ligne permettant :
+Cette application est une démonstration professionnelle d'un système de visualisation de données centralisées, basé sur les principes des entrepôts de données (datawarehousing).
 
-- La visualisation en temps réel de données clients historisées.
-- Le téléversement de fichiers `.json` ou `.csv`.
-- L’actualisation automatique via webhook simulé (`EventSource`).
+## Fonctionnalités
 
-## Installation locale
+- **Téléversement multi-fichiers** : Importez plusieurs fichiers `.csv` ou `.json` d’un seul coup.
+- **Exploration des données** : Toutes les colonnes et lignes des fichiers sont affichées automatiquement.
+- **Interface intuitive** : UI moderne et responsive pour une expérience utilisateur professionnelle.
 
-1. **Cloner le projet**  
-```bash
-git clone https://github.com/EJM0101/Dashboard-Webhook-app && cd Dashboard-Webhook-app
-```
+## Utilisation dans le domaine des entrepôts de données
 
-2. **Installer les dépendances**  
-```bash
-npm install
-```
+Ce tableau de bord simule un système d'ingestion de données client à partir de fichiers externes. Il peut être utilisé pour :
 
-3. **Lancer le serveur de développement**  
-```bash
-npm run dev
-```
+- **Tester des flux ETL légers** (Extract, Transform, Load)
+- **Simuler un mini data lake local**
+- **Fournir une interface aux analystes pour consulter les données**
+- **Construire un prototype de dashboard pour des directions métiers**
 
-## Structure des fichiers CSV pris en charge
+## Technologies utilisées
 
-```csv
-name,email,last_order
-Jean Dupont,jean@example.com,2025-05-21
-Alice Martin,alice@example.com,2025-05-20
-David Kabila,david@example.com,2025-05-19
-Marie Mboma,marie@example.com,2025-05-18
-```
+- **Next.js** — Framework React moderne
+- **Tailwind CSS** — Pour le style rapide et professionnel
+- **JavaScript** — Côté client & serveur
+- **Stockage en mémoire (RAM)** — Pas de base de données, données éphémères
 
-## Dépendances
+## Instructions
 
-- Next.js 14
-- React 18
-- TailwindCSS
-- Formidable (gestion fichiers)
+1. Démarrez l’application avec :
+    ```bash
+    npm install
+    npm run dev
+    ```
+2. Accédez à `http://localhost:3000`
+3. Téléversez un ou plusieurs fichiers CSV ou JSON
+4. Visualisez les données immédiatement
+
+---
+
+**Auteur** : Emman Mlmb  
+**Usage recommandé** : pour prototypage, POC, ou formation à l'analyse de données.
