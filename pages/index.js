@@ -9,9 +9,14 @@ export default function Dashboard() {
 
   const fetchData = async () => {
     setLoading(true);
-    const res = await fetch('/api/data');
-    const json = await res.json();
-    setData(json);
+    try {
+      const res = await fetch('/api/data');
+      const json = await res.json();
+      console.log("Données reçues :", json);
+      setData(json);
+    } catch (err) {
+      console.error("Erreur lors du fetch des données :", err);
+    }
     setLoading(false);
   };
 
@@ -19,6 +24,7 @@ export default function Dashboard() {
     fetchData();
 
     const intervalId = setInterval(() => {
+      console.log("Interval: reload des données");
       fetchData();
     }, 10000);
 
@@ -26,19 +32,41 @@ export default function Dashboard() {
   }, []);
 
   const handleFileChange = (e) => {
+    console.log("Fichiers sélectionnés :", e.target.files);
     setFiles(e.target.files);
   };
 
   const handleUpload = async () => {
+    if (files.length === 0) {
+      alert("Aucun fichier sélectionné.");
+      return;
+    }
+
     const formData = new FormData();
     for (let file of files) {
       formData.append("files", file);
     }
-    await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
-    fetchData();
+
+    console.log("Envoi des fichiers à /api/upload...");
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      const result = await res.json();
+      console.log("Réponse upload :", result);
+
+      if (res.ok) {
+        alert("Fichier uploadé avec succès.");
+        fetchData();
+      } else {
+        alert("Erreur upload !");
+      }
+    } catch (err) {
+      console.error("Erreur lors de l'upload :", err);
+      alert("Erreur réseau lors de l'upload.");
+    }
   };
 
   return (
